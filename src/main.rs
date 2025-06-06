@@ -15,8 +15,8 @@ async fn main() {
         let stream = listener.accept().await;
 
         match stream {
-            Ok((mut stream, _)) => {
-                println!("new accepted connection");
+            Ok((mut stream, client)) => {
+                println!("new accepted connection from client {:?}", client);
                 tokio::spawn(async move {
                     let mut buf = [0; 512];
 
