@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 use tokio::net::{TcpListener, TcpStream};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+mod resp;
 
 #[tokio::main]
 async fn main() {
@@ -18,15 +19,7 @@ async fn main() {
             Ok((mut stream, client)) => {
                 println!("new accepted connection from client {:?}", client);
                 tokio::spawn(async move {
-                    let mut buf = [0; 512];
-
-                    loop {
-                        let read_count = stream.read(&mut buf).await.unwrap();
-                        if read_count == 0 {
-                            break;
-                        }
-                        stream.write(b"+PONG\r\n").await.unwrap();
-                    }
+                    handle_conn(stream).await;
                 });
             }
             Err(e) => {
@@ -36,5 +29,9 @@ async fn main() {
     }
     
                
+    }
+
+    async fn handle_conn(stream: TcpStream) {
+        let  _handler = resp::RespHandler::new(stream);
     }
 
