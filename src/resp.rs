@@ -83,22 +83,23 @@ fn parse_bulk_string(buffer: BytesMut) -> Result<(Value, usize)> {
 }
 
 fn parse_array(buffer: BytesMut) -> Result<(Value, usize)> {
-    let (array_length, mut bytes_consumed) = if let Some((line, len)) = read_until_crlf(&buffer[1..]) {
-        let array_length = parse_int(line)?;
+    let (array_length, mut bytes_consumed) = match read_until_clrf(&buffer[1..]) {
+        Some((line, len)) => {
+            let array_length = parse_int(line)?;
 
         (array_length, len + 1)
-    } else {
-        return Err(anyhow::anyhow!("Invalid array format {:?}", buffer));
-    };
-
+        }
+        None => {
+            return Err(anyhow::anyhow!("Invalid array format {:?}", buffer));
+        }
+    };   
     let mut items = vec![];
     for _ in 0..array_length {
         let (array_item, len) = parse_message(BytesMut::from(&buffer[bytes_consumed..]))?;
 
         items.push(array_item);
         bytes_consumed += len;
-    }
-
+    };
     return Ok((Value::Array(items), bytes_consumed))
 }
 
